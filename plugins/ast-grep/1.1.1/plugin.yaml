@@ -26,4 +26,4 @@ programs:
     versions: ">=0.51.0 <0.52.0"
     version_argv: [--version]
     path: .tools/bin/ast-grep
-wasm: sha256:a84c0a192ac391d0bc191e443842c7de810d7ef4c61596d5119d2277171eecaf
+wasm: sha256:a130908067d76b784a38500a84e874330f8e5659d9710f61807214e33b3e144f

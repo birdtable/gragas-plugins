@@ -1,0 +1,89 @@
+# Runs go vet and go test on GitHub's hosted runners: on Linux and Windows for every pull request,
+# and on Linux, macOS and Windows for every push to main and every tag. It holds no secret, and its
+# token reads the repository's contents alone. Every module is fetched through the public Go module
+# proxy, and nothing is kept in the Actions cache.
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    # A release's proof is all three jobs at the tagged commit.
+    tags: ['v*']
+
+# A newer push to the same branch, pull request or tag cancels the run it supersedes, so that run's
+# runners go back to the pool.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # The organisation's hosted macOS runners are a small pool shared by all its repositories, and
+        # a macOS job has waited out its whole timeout for one. So a pull request runs Linux and
+        # Windows only, and macOS runs where it is the proof: on main and on a tag.
+        os: ${{ github.event_name == 'pull_request' && fromJSON('["ubuntu-latest", "windows-latest"]') || fromJSON('["ubuntu-latest", "windows-latest", "macos-latest"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    # No GOFLAGS or GOPROXY: go's defaults, -mod=readonly and the public proxy, so a go.mod or go.sum
+    # that needs tidying is refused here rather than quietly changed on the runner.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The whole history and its tags, not one commit: tests that compare the tree with its last tag
+      # refuse a shallow clone.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          # The repository is a workspace of one module per plugin, with no root go.mod.
+          go-version-file: go.work
+          cache: false
+      # REPO-SPECIFIC STEP 1 of 2 (the only lines a sibling repo changes in this job, with step 2).
+      - name: go vet
+        # In a workspace with no root module, ./... matches nothing: each module of go.work is named
+        # by its path instead.
+        run: go vet $(go list -m | sed 's|$|/...|')
+      # REPO-SPECIFIC STEP 2 of 2. go test runs with the race detector, in shuffled order and never
+      # from the test cache, and writes its events as JSON for the step after it to count.
+      - name: go test
+        id: test
+        run: |
+          race=-race
+          if [ "$(go env CGO_ENABLED)" != 1 ]; then
+            race=
+          fi
+          echo "GO_TEST_RACE=${race:-off}" >> "$GITHUB_ENV"
+          go test -json $race -shuffle=on -count=1 $(go list -m | sed 's|$|/...|') > "$RUNNER_TEMP/go-test.json"
+      # Counts the passed, failed and skipped tests into the log and the job summary, prints each
+      # failed or skipped test's own output, and is red on any failure and on any skip: a test that
+      # skips on a runner proves nothing there. No test is left out by -skip.
+      - name: test counts
+        if: ${{ !cancelled() && steps.test.outcome != 'skipped' }}
+        env:
+          TEST_OUTCOME: ${{ steps.test.outcome }}
+        run: |
+          events="$RUNNER_TEMP/go-test.json"
+          count() { jq -R -n --arg a "$1" '[inputs | fromjson? | select(.Test != null and .Action == $a)] | length' "$events" | tr -d '\r'; }
+          passed=$(count pass)
+          failed=$(count fail)
+          skipped=$(count skip)
+          jq -R -n -r '[inputs | fromjson? | select(.Test != null)] as $e
+            | ($e | map(select(.Action == "fail" or .Action == "skip") | .Package + " " + .Test)) as $bad
+            | $e[] | select(.Action == "output") | select((.Package + " " + .Test) as $k | any($bad[]; . == $k)) | .Output' "$events" | tr -d '\r'
+          jq -R -n -r '[inputs | fromjson? | select(.Test == null and .Action == "fail")] | .[] | "FAIL " + .Package' "$events" | tr -d '\r'
+          line="tests: $passed passed, $failed failed, $skipped skipped (race $GO_TEST_RACE)"
+          echo "$line"
+          echo "$line" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TEST_OUTCOME" != success ] || [ "$failed" -ne 0 ] || [ "$skipped" -ne 0 ] || [ "$passed" -eq 0 ]; then
+            exit 1
+          fi

@@ -25,4 +25,4 @@ programs:
     manifest: node_modules/eslint/package.json
     script_at: /bin/eslint
     interpreter: node
-wasm: sha256:db4d531d1ffd24d5923e5fbb7de183475ea9fc3c4ee360c2aea489f9ed15ef69
+wasm: sha256:796f9b19e5613cb7dccee745cf85cff4369d714c0248ecaca029063b4436c132
