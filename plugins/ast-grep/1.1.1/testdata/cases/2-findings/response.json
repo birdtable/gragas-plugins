@@ -1,0 +1,1 @@
+{"ok":{"findings":[{"key":"no-eval","message":"do not call eval","path":"src/planted.js","severity":"error"},{"key":"no-var","message":"use let or const","path":"src/planted.js","severity":"warning"}],"ran":true}}

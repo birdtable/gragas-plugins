@@ -1,0 +1,1 @@
+{"error":{"code":"refused","message":"the config file \"tsconfig.ts\" is not JSON: tsc reads a tsconfig.json","path":"/config/0/path"}}

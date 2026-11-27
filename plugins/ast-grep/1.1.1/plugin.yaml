@@ -1,0 +1,29 @@
+# The manifest of the ast-grep plugin: read before any code loads, shown at approval, strict.
+# The plugin is the declarative one over adapter.yaml. Its config read is of files, so plan asks in rounds: the project's
+# sgconfig.yml, then each folder it names (ruleDirs), for the rule files, which are the entries.
+contract: 1
+needs: []
+name: ast-grep
+version: 1.1.1
+tool: ast-grep
+tool_versions: ">=0.51.0 <0.52.0"
+targets: [source]
+provides: [plan, entries, findings, preset]
+extends: false
+warning: true
+preset:
+  path: sgconfig.yml
+  inputs: []
+  mark: true
+wiring:
+  install:
+    - npm
+    - i
+    - "@ast-grep/cli"
+    - -g
+programs:
+  - id: ast-grep
+    versions: ">=0.51.0 <0.52.0"
+    version_argv: [--version]
+    path: .tools/bin/ast-grep
+wasm: sha256:a84c0a192ac391d0bc191e443842c7de810d7ef4c61596d5119d2277171eecaf

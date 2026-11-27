@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "refused",
+    "message": "two keys of the file are one key to the tool (linters)",
+    "path": "/config/0/data"
+  }
+}

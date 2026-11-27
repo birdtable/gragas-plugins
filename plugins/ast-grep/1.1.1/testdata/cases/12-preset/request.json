@@ -1,0 +1,27 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "preset",
+  "body": {
+    "tool_version": "0.51.0",
+    "mark": "gragas:generated",
+    "inputs": [],
+    "entries": [
+      {
+        "key": "no-eval",
+        "target": "source",
+        "severity": "error",
+        "value": {
+          "pattern": "eval($A)"
+        },
+        "options": [
+          1
+        ],
+        "trial": false,
+        "rules": [
+          "js.eval.1"
+        ]
+      }
+    ]
+  }
+}

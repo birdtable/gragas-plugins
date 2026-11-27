@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "refused",
+    "message": "the config loads custom linters (linters.settings.custom.mine)",
+    "path": "/config/0/data"
+  }
+}

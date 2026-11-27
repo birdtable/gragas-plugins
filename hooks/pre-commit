@@ -1,0 +1,11 @@
+#!/bin/sh
+# git runs this at the top of the tree. It runs the pinned task pre-commit and nothing else.
+# Armed once per clone by `task hooks`; there is no CI on a push or a pull request.
+# gate/pins.env is read by gate/read-pins.sh, which refuses any line that is not a pin, and is
+# never run as shell: the runner is started only on a file that pins exactly what it names.
+set -eu
+task_pin="$(sh gate/read-pins.sh TASK_PIN)"
+go_pin="$(sh gate/read-pins.sh GOTOOLCHAIN)"
+# The run gets an allowlisted environment (gate/clean-env.sh): no task, Go or git switch of
+# the caller's reaches it.
+exec sh gate/clean-env.sh env GOTOOLCHAIN="$go_pin" GOFLAGS=-mod=mod GOWORK=off go run "github.com/go-task/task/v3/cmd/task@${task_pin}" pre-commit

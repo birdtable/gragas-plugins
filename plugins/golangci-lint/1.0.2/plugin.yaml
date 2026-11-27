@@ -1,0 +1,33 @@
+# The manifest of the golangci-lint plugin: read before any code loads, shown at approval, strict.
+# Its operations are the declarative plugin's, over adapter.yaml, with the plugin's own plan and entries for the refusals
+# of a config that loads code and for the settings blocks of the file.
+contract: 1
+needs: []
+name: golangci-lint
+version: 1.0.2
+tool: golangci-lint
+tool_versions: ">=2.15.0 <3.0.0"
+targets: [source]
+provides: [plan, entries, findings, rank, preset]
+extends: false
+warning: true
+preset:
+  path: .golangci.yml
+  inputs: [settings.yml]
+  mark: true
+  # golangci-lint's config holds no severity, and `default: standard` turns on the four linters below besides the
+  # preset's own.
+  readback:
+    severity: false
+    defaults: [govet, ineffassign, staticcheck, unused]
+wiring:
+  install:
+    - go
+    - install
+    - github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
+programs:
+  - id: golangci-lint
+    versions: ">=2.15.0 <3.0.0"
+    version_argv: [--version]
+    path: .tools/bin/golangci-lint
+wasm: sha256:64ed38fd13baa19a779645c4e52ebc94c93328a7ebb76d28424ac576a717cf74

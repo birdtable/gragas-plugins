@@ -1,0 +1,1 @@
+{"ok":{"final":true,"steps":[{"argv":["-p","{scratch}/bad","--pretty","false"],"kind":"run","program":"tsc"}]}}

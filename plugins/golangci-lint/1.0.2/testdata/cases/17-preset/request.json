@@ -1,0 +1,42 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "preset",
+  "body": {
+    "tool_version": "2.15.0",
+    "mark": "gragas:generated",
+    "inputs": [
+      {
+        "path": "settings.yml",
+        "data": {
+          "text": "version: \"2\"\n\nlinters:\n  default: standard\n  enable:\n    # generated:linters:begin\n    # generated:linters:end\n"
+        }
+      }
+    ],
+    "entries": [
+      {
+        "key": "gocritic",
+        "target": "source",
+        "severity": "error",
+        "trial": false,
+        "rules": [
+          "tests.doubles.2",
+          "arch.shared.7",
+          "go.style.5",
+          "arch.ports.11",
+          "cli.look.1",
+          "arch.ports.24"
+        ]
+      },
+      {
+        "key": "errcheck",
+        "target": "source",
+        "severity": "error",
+        "trial": false,
+        "rules": [
+          "go.err.1"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+{"body":{"config":[{"data":{"text":"{\"compilerOptions\":{\"strict\":true,\"noEmit\":true,\"target\":\"es2022\",\"module\":\"esnext\",\"moduleResolution\":\"bundler\",\"types\":[]},\"include\":[\"fixtures/bad/src\"]}\n"},"path":"tsconfig.json"}],"fixtures":["bad"],"for":"run","have":[],"round":0,"target":"source","tool_version":"6.0.3"},"contract":1,"features":[],"op":"plan"}

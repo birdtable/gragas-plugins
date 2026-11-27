@@ -1,0 +1,28 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "rank",
+  "body": {
+    "tool_version": "2.15.0",
+    "pairs": [
+      {
+        "key": "govet",
+        "aspect": "value",
+        "preset": true,
+        "found": false
+      },
+      {
+        "key": "govet",
+        "aspect": "value",
+        "preset": false,
+        "found": true
+      },
+      {
+        "key": "govet",
+        "aspect": "value",
+        "preset": true,
+        "found": true
+      }
+    ]
+  }
+}

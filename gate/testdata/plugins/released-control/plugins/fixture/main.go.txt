@@ -1,0 +1,45 @@
+// Command control is the clean control's plugin with one word of a message changed since its 0.0.1 was released:
+// the plants that read RELEASES build 0.0.1's plugin.wasm from the clean control's source, and
+// this source builds other bytes. A plugin of a made-up tool that provides entries alone, on the SDK's Serve, so
+// every contract case the pinned gragas runs is answered as a plugin answers it.
+// Its entries are always none, for a tool version in plugin.yaml's tool_versions (">=10.13.0 <11.0.0"); a
+// version outside it answers unsupported (check C16), and the other operations answer unsupported.
+package main
+
+import (
+	"strconv"
+	"strings"
+
+	"github.com/birdtable/gragas-plugin-sdk/plugin"
+	"github.com/birdtable/gragas-plugin-sdk/wire"
+)
+
+// control provides entries and nothing else.
+type control struct{ plugin.Unsupported }
+
+// Entries is no entry, whatever the tool printed, for a tool version the plugin serves.
+func (control) Entries(r wire.EntriesRequest) (wire.EntriesResponse, error) {
+	if !served(r.ToolVersion) {
+		return wire.EntriesResponse{}, plugin.Unsupportedf("this plugin serves the fixture >=10.13.0 <11.0.0, and the request is for %q", r.ToolVersion)
+	}
+	return wire.EntriesResponse{}, nil
+}
+
+// served is whether v, major.minor.patch, is in >=10.13.0 <11.0.0: major 10 and minor 13 or more.
+func served(v string) bool {
+	parts := strings.Split(v, ".")
+	if len(parts) != 3 {
+		return false
+	}
+	var n [3]int
+	for i, p := range parts {
+		x, err := strconv.Atoi(p)
+		if err != nil || x < 0 || strconv.Itoa(x) != p {
+			return false
+		}
+		n[i] = x
+	}
+	return n[0] == 10 && n[1] >= 13
+}
+
+func main() { plugin.Serve(control{}) }

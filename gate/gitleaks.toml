@@ -1,0 +1,35 @@
+# The secret scan's config. Every gitleaks call of the Taskfile names it by absolute path
+# ({{.ROOT_DIR}}/gate/gitleaks.toml), so the tree a scan reads, which at landing is the pull request's squash,
+# never supplies a config: gitleaks reads <source>/.gitleaks.toml only when it is given none. A .gitleaks.toml or
+# a .gitleaksignore anywhere in the tree turns the members red (gate/secrets-refuse.sh). The file is gate's.
+title = "gragas-plugins"
+
+[extend]
+useDefault = true
+
+# The golangci-lint plugin's recorded entries list holds linter names as {"key":"<linter>"}
+# (embeddedstructfieldcheck, gocheckcompilerdirectives); gitleaks reads a long one as a generic-api-key. They
+# are names, not secrets. All three must hold, so nothing else is let through: the rule is generic-api-key, the
+# path is a testdata/cases JSON file, and the value is lowercase letters only. The value stays ^[a-z]+$: a
+# digit or an underscore would let a lowercase hex key through.
+[[allowlists]]
+description = "a lowercase linter name in a recorded case"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = ['''(^|/)testdata/cases/[^/]+/[^/]+\.json$''']
+regexTarget = "secret"
+regexes = ['''^[a-z]+$''']
+
+# A name that rule does not cover: exhaustruct_v5 holds a digit and an underscore. One entry, with its path, its
+# rule and its value, replaces the .gitleaksignore line that was here; it names no commit. Each bundle of the plugin
+# carries the case, so each bundle's path is a line of its own.
+[[allowlists]]
+description = "exhaustruct_v5, a linter name, in the golangci-lint entries case"
+condition = "AND"
+targetRules = ["generic-api-key"]
+paths = [
+  '''^plugins/golangci-lint/1\.0\.0/testdata/cases/1-entries/response\.json$''',
+  '''^plugins/golangci-lint/1\.0\.2/testdata/cases/1-entries/response\.json$''',
+]
+regexTarget = "secret"
+regexes = ['''^exhaustruct_v5$''']

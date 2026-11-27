@@ -1,0 +1,20 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "plan",
+  "body": {
+    "tool_version": "2.15.0",
+    "config": [
+      {
+        "path": ".golangci.yml",
+        "data": {
+          "text": "linters:\n  a: 1\nLinters:\n  b: 2\n"
+        }
+      }
+    ],
+    "have": [],
+    "for": "config",
+    "target": "source",
+    "round": 0
+  }
+}

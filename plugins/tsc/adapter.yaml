@@ -1,0 +1,94 @@
+# The adapter data of the tsc plugin, as gragas's adapter tsc 1.1.0 was, with the exit codes
+# added (ran_codes): the SDK's findings read a non-zero exit as a failure of the tool unless the adapter names it
+# as a run. tsc exits 1 or 2 when it reports a diagnostic (outputs skipped, or generated) and 0 when it reports none;
+# 3 is a project it could not read, and 4 a cycle of project references, which are the tool's failure.
+#
+# The adapter for the TypeScript compiler v6 (M3-04). Tested at 6.0.3.
+#
+# Effective options are read with `tsc --showConfig -p <config>`, which
+# prints the tsconfig as JSON (arch.ports.20); an entry is a compiler option
+# by its key, and its value is the option's whole value. The compiler has no
+# warning level (S53): a diagnostic is an error, so the adapter names none.
+#
+# The run is `tsc -p <fixture project>`: the compiler refuses a project and
+# files together, so the fixture is a folder with its own tsconfig. The
+# plain, non-decorated print has one diagnostic to a line; there is no
+# machine form for it, which only_form says (arch.ports.20).
+format: 3
+tool: tsc
+version: 1.1.0
+tool_versions: ">=6.0.3 <7.0.0"
+targets: [source]
+extends: true
+config_loads_code: false
+config:
+  - target: source
+    argv: [--showConfig, -p, "{config}"]
+    format: json
+    entries:
+      each: /compilerOptions
+run:
+  argv:
+    - -p
+    - "{fixtures}"
+    - --pretty
+    - "false"
+  output:
+    format: lines
+    only_form: true
+    ran_codes: [0, 1, 2]
+    pattern: '^(?P<path>[^\n(]+)\((?P<line>\d+),(?P<column>\d+)\): (?P<severity>error) (?P<key>TS\d+): (?P<message>.*)$'
+version_argv: [--version]
+# An option's direction is its own: the strict family is tighter
+# on and skipLibCheck tighter off. Read from the compiler's option reference;
+# an option not named has no direction, and a differing value of it has no word.
+values:
+  keys:
+    - {key: strict, order: [false, true]}
+    - {key: noImplicitAny, order: [false, true]}
+    - {key: strictNullChecks, order: [false, true]}
+    - {key: strictFunctionTypes, order: [false, true]}
+    - {key: strictBindCallApply, order: [false, true]}
+    - {key: strictPropertyInitialization, order: [false, true]}
+    - {key: noImplicitThis, order: [false, true]}
+    - {key: useUnknownInCatchVariables, order: [false, true]}
+    - {key: alwaysStrict, order: [false, true]}
+    - {key: noUnusedLocals, order: [false, true]}
+    - {key: noUnusedParameters, order: [false, true]}
+    - {key: noImplicitReturns, order: [false, true]}
+    - {key: noFallthroughCasesInSwitch, order: [false, true]}
+    - {key: noUncheckedIndexedAccess, order: [false, true]}
+    - {key: exactOptionalPropertyTypes, order: [false, true]}
+    - {key: noImplicitOverride, order: [false, true]}
+    - {key: skipLibCheck, order: [true, false]}
+severities:
+  form: level
+  levels:
+    - name: error
+      is: error
+# The preset. tsc reads tsconfig.json, which is JSONC
+# (typescriptlang.org/tsconfig); an entry is a member of compilerOptions. The
+# tool has no severity. A tsconfig extends another by extends, a path
+# (typescriptlang.org/tsconfig#extends). Install is from
+# typescriptlang.org/download.
+preset:
+  path: tsconfig.json
+  format: jsonc
+  comment: slash
+  placement:
+    shape: object
+    each: /compilerOptions
+  wiring:
+    import:
+      at: /extends
+      form: string
+    install:
+      - npm
+      - install
+      - typescript
+      - --save-dev
+resolve_from: node_modules
+paths:
+  - ecosystem: node
+    package: typescript
+    bin: tsc

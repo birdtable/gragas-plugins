@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"
+     role="img" aria-label="gragas-plugins">
+  <title>gragas-plugins</title>
+
+  <!--
+    The gragas feather with a plug badge. The feather is gragas's own icon, unchanged
+    but for its line; the ink disc in the corner holds a plug, head, two prongs and a
+    stub of cord, on a ring of the ground so it stands clear of the feather. A plugin
+    is one more tool gragas can hold to the rules, and the plug says so.
+
+    Flat shapes, no gradients, the family's ink, grey and pale on a ground of its own,
+    sage, where gragas has the greylag grey and the SDK sand. At sixteen pixels the plug
+    becomes a dot in the corner and the feather and the ground carry it. Approved by the
+    operator on 22 Nov 2026 (P3b); its ground on 24 Nov 2026 (C1).
+  -->
+
+  <defs>
+    <clipPath id="badge">
+      <rect x="0" y="0" width="256" height="256" rx="56" ry="56"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#badge)">
+    <rect width="256" height="256" fill="#C2D5C8"/>
+    <g transform="translate(18 226) rotate(0) scale(1)">
+    <path fill="#161A1F" d="M42 -47 C44 -86 78 -132 160 -172 Q94 -103 42 -47 Z"/>
+    <path fill="#6C7681" d="M160 -172 C150 -110 110 -60 48 -36 L42 -47 Q94 -103 160 -172 Z"/>
+    <path d="M145 -118 L127 -121 M114 -78 L98 -83 M77 -115 L88 -109" stroke="#C2D5C8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M22 -24 Q32 -35 42 -47" stroke="#161A1F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M42 -47 Q94 -103 152 -164" stroke="#F2F5F8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <circle cx="190" cy="190" r="40" fill="#C2D5C8"/>
+    <circle cx="190" cy="190" r="32" fill="#161A1F"/>
+    <rect x="180" y="168" width="6" height="12" rx="2" fill="#F2F5F8"/>
+    <rect x="194" y="168" width="6" height="12" rx="2" fill="#F2F5F8"/>
+    <rect x="174" y="178" width="32" height="18" rx="5" fill="#F2F5F8"/>
+    <path d="M190 196 L190 210" stroke="#F2F5F8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+</svg>

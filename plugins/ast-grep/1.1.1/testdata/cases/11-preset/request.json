@@ -1,0 +1,36 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "preset",
+  "body": {
+    "tool_version": "0.51.0",
+    "mark": "Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.",
+    "inputs": [],
+    "entries": [
+      {
+        "key": "no-console",
+        "target": "source",
+        "severity": "error",
+        "value": {
+          "pattern": "console.log($A)"
+        },
+        "trial": false,
+        "rules": [
+          "arch.pat.1"
+        ]
+      },
+      {
+        "key": "no-eval",
+        "target": "source",
+        "severity": "warning",
+        "value": {
+          "pattern": "eval($A)"
+        },
+        "trial": true,
+        "rules": [
+          "arch.pat.2"
+        ]
+      }
+    ]
+  }
+}

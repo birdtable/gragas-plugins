@@ -1,0 +1,33 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "entries",
+  "body": {
+    "tool_version": "2.15.0",
+    "config": [
+      {
+        "path": ".golangci.yml",
+        "data": {
+          "text": "linters:\n  settings:\n    Revive:\n      rules: []\n"
+        }
+      }
+    ],
+    "have": [
+      {
+        "round": 0,
+        "step": 0,
+        "kind": "run",
+        "exit": 0,
+        "stdout": {
+          "text": "{\"Enabled\":[{\"Name\":\"govet\"},{\"Name\":\"errcheck\"}],\"Disabled\":[{\"Name\":\"revive\"}]}"
+        },
+        "stderr": {
+          "text": ""
+        },
+        "cut": false,
+        "files": []
+      }
+    ],
+    "target": "source"
+  }
+}

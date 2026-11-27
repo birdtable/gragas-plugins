@@ -1,0 +1,14 @@
+# The secret scan's second pass (gate/secrets.sh): gitleaks' private-key rule alone,
+# with no allow-list. The first pass, gate/gitleaks.toml, extends gitleaks' default rules, and gitleaks 8.30.1
+# appends the default config's global allow-list (go.sum, go.mod, go.work, .svg, .png, .pdf, .bin, fonts, the lock
+# files, vendor/, any path holding gitleaks.toml) to every config that extends them, with no key that drops it
+# (config/config.go:487). This config extends nothing, so no path and no file type is exempt from it. The rule is
+# the private-key rule of gitleaks 8.30.1's default config (config/gitleaks.toml): its id, regex and keywords as
+# they are there. The file is gate's.
+title = "gragas-plugins: a private key at any path"
+
+[[rules]]
+id = "private-key"
+description = "A private key, at any path and in any file type"
+regex = '''(?i)-----BEGIN[ A-Z0-9_-]{0,100}PRIVATE KEY(?: BLOCK)?-----[\s\S-]{64,}?KEY(?: BLOCK)?-----'''
+keywords = ["-----begin"]

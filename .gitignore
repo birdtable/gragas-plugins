@@ -1,0 +1,5 @@
+.DS_Store
+/dist/
+/.tools/
+/plugins/*/eslint
+/plugins/*/tsc

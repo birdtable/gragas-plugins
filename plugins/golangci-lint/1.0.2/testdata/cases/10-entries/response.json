@@ -1,0 +1,30 @@
+{
+  "ok": {
+    "entries": [
+      {
+        "key": "errcheck",
+        "on": true
+      },
+      {
+        "key": "govet",
+        "on": true
+      },
+      {
+        "key": "ineffassign",
+        "on": true
+      },
+      {
+        "key": "revive",
+        "on": true
+      },
+      {
+        "key": "staticcheck",
+        "on": true
+      },
+      {
+        "key": "unused",
+        "on": true
+      }
+    ]
+  }
+}

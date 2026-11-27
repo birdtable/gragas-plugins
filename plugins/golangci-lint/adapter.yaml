@@ -1,0 +1,97 @@
+# The adapter for golangci-lint v2 (M3-03). Tested at 2.15.0, the version
+# tools.yaml pins; the range holds the line of v2 the tool keeps its two
+# machine forms across.
+#
+# Effective config is read from `golangci-lint linters --json`, which prints
+# the linters the config enables as JSON (arch.ports.20). The tool has no
+# print of its settings, so a linter's setting by dotted key and a severity
+# rule are not entries here; the direct read of the config file was
+# rejected.
+#
+# The run prints SARIF alone on stdout: the text printer goes to /dev/null and
+# the statistics are off, so stdout holds one document.
+format: 3
+tool: golangci-lint
+version: 1.0.2
+tool_versions: ">=2.15.0 <3.0.0"
+targets: [source]
+extends: false
+config_loads_code: true
+config:
+  - target: source
+    argv: [linters, --json, -c, "{config}"]
+    format: json
+    entries:
+      each: /Enabled
+      key: /name
+      as: "true"
+      also:
+        - each: /Disabled
+          key: /name
+          as: "false"
+run:
+  argv:
+    - run
+    - -c
+    - "{config}"
+    - --show-stats=false
+    - --output.text.path
+    - /dev/null
+    - --output.sarif.path
+    - stdout
+    - "{fixtures}"
+  output:
+    format: sarif
+    # golangci-lint exits 1 when it printed findings (issues-exit-code), and that is a run; 3 and up are its own failures.
+    ran_codes: [0, 1]
+version_argv: [--version]
+# A linter is on or off: the two lists of the print, read as true and false.
+values:
+  off_values: [false]
+  order: [true]
+severities:
+  form: table
+  levels:
+    - name: error
+      is: error
+    - name: warning
+      is: warning
+  warning: warning
+# The preset. golangci-lint v2 reads .golangci.yml, YAML, with
+# the enabled linters in the list linters.enable and the severity overrides in
+# severity.rules (golangci-lint.run/docs/configuration/file/). The config page
+# states no way for one config to extend another, so extends is false and
+# there is no import. Install is the Go module's own, from
+# golangci-lint.run/docs/welcome/install/local/ (that page recommends its
+# binary script; the script is a pipe to sh, which an argv cannot hold).
+# The file starts with version: "2" (the same page: the v2 file's first key),
+# and severity.rules is a list of items, each a map of linters, a list of
+# names, and severity (the same page, the severity section).
+preset:
+  path: .golangci.yml
+  format: yaml
+  comment: hash
+  lines:
+    - key: version
+      value: "2"
+  settings:
+    file: settings.yml
+    begin: "# generated:linters:begin"
+    end: "# generated:linters:end"
+  placement:
+    shape: list
+    each: /linters/enable
+    severity_table: /severity/rules
+    severity_item:
+      shape: list
+      key: /linters
+      key_form: list
+      level: /severity
+  wiring:
+    install:
+      - go
+      - install
+      - github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
+paths:
+  - ecosystem: go
+    path: .tools/bin/golangci-lint

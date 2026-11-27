@@ -1,0 +1,8 @@
+github.com/birdtable/gragas-plugin-sdk v0.4.0 h1:1iemNcSx0PI4lncXyAPVZca6R3jR43DKmi8+SxY4Yf8=
+github.com/birdtable/gragas-plugin-sdk v0.4.0/go.mod h1:Rg5jN+2lWk4cnM9USYoU2Lf7YnvCVaYXVaZX8wviLUs=
+github.com/birdtable/gragas-plugin-sdk v0.4.1 h1:gY3k7Rade5LY0dFwbULAU+iGw/ypCwQrqwqU7rP4kxg=
+github.com/birdtable/gragas-plugin-sdk v0.4.1/go.mod h1:Rg5jN+2lWk4cnM9USYoU2Lf7YnvCVaYXVaZX8wviLUs=
+go.yaml.in/yaml/v3 v3.0.6 h1:zcDfvjXEqTQmpjniUBLc91xYJMB2c4QOFxEF/LCEckM=
+go.yaml.in/yaml/v3 v3.0.6/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+golang.org/x/mod v0.42.0 h1:ICeL3t2L30ljSPHHxDnR4fqVcBt/zR2zJAb9juavmQg=
+golang.org/x/mod v0.42.0/go.mod h1:u5fzIrRInkL8MaO1cbRkUHT64v303YIT5KEqpNr7jRs=

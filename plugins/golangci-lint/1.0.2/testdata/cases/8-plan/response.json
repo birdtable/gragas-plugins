@@ -1,0 +1,11 @@
+{
+  "ok": {
+    "steps": [
+      {
+        "kind": "read",
+        "glob": ".golangci.yml"
+      }
+    ],
+    "final": false
+  }
+}

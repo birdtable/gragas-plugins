@@ -1,0 +1,16 @@
+=== rules/no-console.yml (ast-grep, copy-once true)
+# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.
+id: no-console
+rule:
+  pattern: "console.log($A)"
+severity: error
+=== rules/no-eval.yml (ast-grep, copy-once true)
+# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.
+id: no-eval
+rule:
+  pattern: "eval($A)"
+severity: warning
+=== sgconfig.yml (ast-grep, copy-once true)
+# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.
+ruleDirs:
+  - rules

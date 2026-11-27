@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "unreadable",
+    "message": "rules holds the file rules/.gitignore, which a tool reads to leave files out and this reader does not read: the folder is refused, never guessed",
+    "path": "/have/1/files/0/data"
+  }
+}

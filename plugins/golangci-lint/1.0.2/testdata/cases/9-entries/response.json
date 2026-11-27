@@ -1,0 +1,18 @@
+{
+  "ok": {
+    "entries": [
+      {
+        "key": "errcheck",
+        "on": true
+      },
+      {
+        "key": "govet",
+        "on": true
+      },
+      {
+        "key": "revive",
+        "on": false
+      }
+    ]
+  }
+}

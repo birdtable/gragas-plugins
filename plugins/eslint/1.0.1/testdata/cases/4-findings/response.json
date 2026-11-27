@@ -1,0 +1,1 @@
+{"ok":{"findings":[{"column":1,"key":"no-debugger","line":1,"message":"Unexpected 'debugger' statement.","severity":"error"},{"column":20,"key":"eqeqeq","line":2,"message":"Expected '===' and instead saw '=='.","severity":"warning"}],"ran":true}}

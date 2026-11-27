@@ -1,0 +1,18 @@
+{
+  "ok": {
+    "files": [
+      {
+        "path": "rules/no-console.yml",
+        "text": "# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.\nid: no-console\nrule:\n  pattern: \"console.log($A)\"\nseverity: error\n"
+      },
+      {
+        "path": "rules/no-eval.yml",
+        "text": "# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.\nid: no-eval\nrule:\n  pattern: \"eval($A)\"\nseverity: warning\n"
+      },
+      {
+        "path": "sgconfig.yml",
+        "text": "# Written once by gragas from the rulebook. It is yours to edit: gragas does not write it again.\nruleDirs:\n  - rules\n"
+      }
+    ]
+  }
+}

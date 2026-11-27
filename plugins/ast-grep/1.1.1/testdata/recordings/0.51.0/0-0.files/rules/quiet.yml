@@ -1,0 +1,6 @@
+id: quiet
+language: javascript
+severity: "off"
+message: switched off
+rule:
+  pattern: debugger

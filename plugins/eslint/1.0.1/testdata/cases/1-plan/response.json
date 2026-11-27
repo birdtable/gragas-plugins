@@ -1,0 +1,1 @@
+{"ok":{"final":true,"steps":[{"argv":["--print-config","{scratch}/probe.js","-c","{scratch}/eslint.config.mjs"],"kind":"run","level":"isolated","place":[{"data":{"text":""},"path":"probe.js"}],"program":"eslint"}]}}

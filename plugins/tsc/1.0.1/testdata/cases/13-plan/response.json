@@ -1,0 +1,1 @@
+{"error":{"code":"refused","message":"the config file \"tsconfig.json\" reaches beyond its one file: it extends \"../tsconfig.base.json\", and the plan places only the config","path":"/config/0/data/text"}}

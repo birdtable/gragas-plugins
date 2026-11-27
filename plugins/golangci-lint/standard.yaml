@@ -1,0 +1,8 @@
+# The linters golangci-lint v2 runs when a config says `linters.default: standard` (golangci-lint.run/docs/linters/):
+# the tool's own list, which gragas held as standardLinters (internal/core/rulebook/standing.go) until the plugin took it.
+standard:
+  - errcheck
+  - govet
+  - ineffassign
+  - staticcheck
+  - unused

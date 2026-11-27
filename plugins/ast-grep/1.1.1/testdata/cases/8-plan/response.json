@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "refused",
+    "message": "sgconfig.yml names the folder \"../outside\", which is not a path below the project root: slash-separated, no step empty, . or .., not absolute, so it is not read",
+    "path": "/config/0/data"
+  }
+}

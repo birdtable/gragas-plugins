@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "refused",
+    "message": "the options of govet are not an object, which this plugin writes",
+    "path": "/entries/0/options"
+  }
+}

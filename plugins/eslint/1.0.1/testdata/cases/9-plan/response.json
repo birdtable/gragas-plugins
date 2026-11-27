@@ -1,0 +1,1 @@
+{"error":{"code":"refused","message":"the config file \".eslintrc.js\" is a legacy eslintrc, which ESLint 10 does not read: use eslint.config.js","path":"/config/0/path"}}

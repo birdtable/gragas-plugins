@@ -1,0 +1,98 @@
+# The adapter data of the ESLint plugin, as gragas's adapter eslint 1.1.0 was, with the exit codes
+# added (ran_codes): the SDK's findings read a non-zero exit as a failure of the tool unless the adapter names it
+# as a run. ESLint exits 1 when it reports an error and 2 when it could not run (its own docs, exit codes).
+#
+# The adapter for ESLint v10 (M3-04). Tested at 10.13.0; the range holds the
+# line of v10, whose flat config and JSON formatter it was recorded against.
+#
+# Effective config is read per file with `eslint --print-config <file>`
+# (arch.ports.20): rules is an object, a rule's member is a list of its
+# severity as the tool prints it (0 off, 1 warn, 2 error; 0 is the adapter's off word) then its options.
+# Only the first option is an entry's options (/1): ESLint lets a rule take
+# more, and a second one is not read.
+#
+# The run prints the JSON formatter's document alone on stdout. It is a list
+# of one result per file with its messages; one fixture file is linted per
+# run, so the findings are the messages of the first result.
+format: 3
+tool: eslint
+version: 1.1.0
+tool_versions: ">=10.13.0 <11.0.0"
+targets: [source]
+extends: true
+config_loads_code: false
+config:
+  - target: source
+    argv: [--print-config, "{fixtures}", -c, "{config}"]
+    format: json
+    entries:
+      each: /rules
+      value: /0
+      options: /1
+      severity: /0
+run:
+  argv:
+    - -c
+    - "{config}"
+    - -f
+    - json
+    - "{fixtures}"
+  output:
+    format: json
+    each: /0/messages
+    ran_codes: [0, 1]
+    fields:
+      key: /ruleId
+      message: /message
+      line: /line
+      column: /column
+      severity: /severity
+version_argv: [--version]
+severities:
+  form: level
+  levels:
+    - name: error
+      is: error
+    - name: warn
+      is: warning
+    - name: "2"
+      is: error
+    - name: "1"
+      is: warning
+  warning: warn
+  off_words: ["0"]
+# The preset. ESLint v10 reads eslint.config.js, a JS module
+# (eslint.org/docs/latest/use/configure/configuration-files). A rule is a
+# member of rules, its value an array: the severity first, the options after.
+# A config extends another by extends in defineConfig from eslint/config
+# (eslint.org/docs/latest/use/configure/configuration-files#extending-configurations).
+# Install is from eslint.org/docs/latest/use/getting-started.
+preset:
+  path: eslint.config.js
+  format: js
+  comment: slash
+  placement:
+    shape: object
+    each: /rules
+    value: /0
+    options: /1
+    severity: /0
+  wiring:
+    import:
+      at: /extends
+      form: list
+    install:
+      - npm
+      - install
+      - --save-dev
+      - eslint@latest
+      - "@eslint/js@latest"
+resolve_from: node_modules
+paths:
+  - ecosystem: node
+    package: eslint
+    bin: eslint
+# A rule's value is the severity ESLint prints: 0 is off, 1 warns and 2 errors, each tighter than the last.
+values:
+  off_values: [0]
+  order: [1, 2]

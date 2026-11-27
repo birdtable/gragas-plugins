@@ -1,0 +1,28 @@
+contract: 1
+needs: []
+name: eslint
+version: 1.0.1
+tool: eslint
+tool_versions: ">=10.13.0 <11.0.0"
+targets: [source]
+provides: [plan, entries, findings, rank, preset]
+extends: true
+warning: true
+preset:
+  path: eslint.config.js
+  inputs: []
+  mark: true
+wiring:
+  import:
+    at: /extends
+    form: list
+  install: [npm, install, --save-dev, eslint@latest, "@eslint/js@latest"]
+resolve_from: node_modules
+programs:
+  - id: eslint
+    versions: ">=10.13.0 <11.0.0"
+    version_argv: [--version]
+    manifest: node_modules/eslint/package.json
+    script_at: /bin/eslint
+    interpreter: node
+wasm: sha256:db4d531d1ffd24d5923e5fbb7de183475ea9fc3c4ee360c2aea489f9ed15ef69

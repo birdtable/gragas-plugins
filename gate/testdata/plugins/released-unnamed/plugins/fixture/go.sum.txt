@@ -1,0 +1,2 @@
+github.com/birdtable/gragas-plugin-sdk v0.4.0 h1:1iemNcSx0PI4lncXyAPVZca6R3jR43DKmi8+SxY4Yf8=
+github.com/birdtable/gragas-plugin-sdk v0.4.0/go.mod h1:Rg5jN+2lWk4cnM9USYoU2Lf7YnvCVaYXVaZX8wviLUs=

@@ -1,0 +1,102 @@
+# The adapter for ast-grep. Tested at 0.51.0.
+#
+# ast-grep prints no effective config: rule files are found through
+# `ruleDirs` of sgconfig.yml and no command lists them. So its config read is
+# of files: the folders ruleDirs
+# names are read through the Tree port, and each rule file there is one entry,
+# its id the key and its severity the level. Off is a word a rule file may hold.
+#
+# The run prints the matches as compact JSON, one list; a match maps to its
+# rule by `ruleId`. Its line and column are 0-based and so are not read.
+format: 3
+tool: ast-grep
+version: 1.1.1
+tool_versions: ">=0.51.0 <0.52.0"
+targets: [source]
+extends: false
+# A rule file (ast-grep.github.io/reference/yaml.html) is one YAML mapping with
+# id, language, rule and severity; sgconfig.yml names its folders by ruleDirs,
+# each relative to the file (ast-grep.github.io/reference/sgconfig.html).
+config:
+  - target: source
+    files:
+      config: sgconfig.yml
+      dirs: /ruleDirs
+      ext: [.yml, .yaml]
+    format: yaml
+    entries:
+      each: ""
+      key: /id
+      value: /rule
+      severity: /severity
+      options_top: true
+run:
+  argv:
+    - scan
+    - --json=compact
+    - -c
+    - "{config}"
+    - "{fixtures}"
+  output:
+    format: json
+    # ast-grep exits 1 when a rule of severity error matched, which is a run that
+    # found something (recorded at 0.51.0); a config it cannot read exits 6.
+    ran_codes: [0, 1]
+    each: ""
+    fields:
+      key: /ruleId
+      message: /message
+      path: /file
+      severity: /severity
+version_argv: [--version]
+severities:
+  form: level
+  levels:
+    - name: error
+      is: error
+    - name: warning
+      is: warning
+    - name: hint
+      is: info
+    - name: info
+      is: info
+  warning: warning
+  # A rule file that names no severity is a hint, as ast-grep reads one.
+  default: hint
+  # A rule file may switch a rule off; no match carries it (decision
+  # ast-grep-adapter item 5), so it is a word of the files read alone.
+  off_words: ["off"]
+# The preset. ast-grep reads sgconfig.yml, YAML, which names the
+# folders of rule files (ast-grep.github.io/reference/sgconfig.html); a rule
+# is a YAML file of its own, with id, language, rule and severity
+# (ast-grep.github.io/reference/yaml.html). The pages state no way for one
+# config to extend another, so there is no import. Install is from
+# ast-grep.github.io/guide/quick-start.html. sgconfig.yml names its rule
+# folders by ruleDirs, a list (ast-grep.github.io/reference/sgconfig.html), so
+# the file carries ruleDirs: [rules], the folder of placement.dir.
+preset:
+  path: sgconfig.yml
+  format: yaml
+  comment: hash
+  lines:
+    - key: ruleDirs
+      items: [rules]
+  placement:
+    shape: files
+    dir: rules
+    key: /id
+    value: /rule
+    severity: /severity
+    options_top: true
+  wiring:
+    install:
+      - npm
+      - i
+      - "@ast-grep/cli"
+      - -g
+# The pinned release binary, which tools.yaml pins and `task tools` places in
+# .tools/bin under the system's own file name, as it does golangci-lint's; a
+# node_modules/.bin entry is a shim no system starts the same way.
+paths:
+  - ecosystem: go
+    path: .tools/bin/ast-grep

@@ -1,0 +1,8 @@
+go 1.27.1
+
+use (
+	./plugins/ast-grep
+	./plugins/eslint
+	./plugins/golangci-lint
+	./plugins/tsc
+)

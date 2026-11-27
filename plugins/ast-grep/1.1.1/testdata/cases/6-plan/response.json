@@ -1,0 +1,19 @@
+{
+  "ok": {
+    "steps": [
+      {
+        "kind": "read",
+        "glob": "rules/**/*.yml"
+      },
+      {
+        "kind": "read",
+        "glob": "rules/**/*.yaml"
+      },
+      {
+        "kind": "read",
+        "glob": "rules/**/.*ignore"
+      }
+    ],
+    "final": true
+  }
+}

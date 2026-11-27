@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "refused",
+    "message": ".golangci.toml is read by golangci-lint as toml, a format this check does not read",
+    "path": "/config/0"
+  }
+}

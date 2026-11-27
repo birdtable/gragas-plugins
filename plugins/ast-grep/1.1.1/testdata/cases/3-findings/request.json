@@ -1,0 +1,1 @@
+{"body":{"config":[{"data":{"text":"ruleDirs:\n  - rules\n"},"path":"sgconfig.yml"}],"fixtures":["rules/no-eval.yml","rules/no-var.yml","rules/quiet.yml","src/clean.js"],"have":[{"cut":false,"exit":0,"files":[],"kind":"run","round":0,"stderr":{"text":""},"stdout":{"text":"[]\n"},"step":0}],"scratch":"/scratch","tool_version":"0.51.0"},"contract":1,"features":[],"op":"findings"}

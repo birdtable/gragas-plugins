@@ -1,0 +1,16 @@
+contract: 1
+needs: []
+name: fixture
+version: 0.0.1
+tool: fixture
+tool_versions: ">=10.13.0 <11.0.0"
+targets: [source]
+provides: [entries]
+extends: false
+warning: false
+programs:
+  - id: fixture
+    path: bin/fixture
+    version_argv: [--version]
+    versions: ">=10.13.0 <11.0.0"
+wasm: sha256:deb8fc41d6083833096fbc95fb5f8f8850aee5ef2495e90143892fad81e31f1b

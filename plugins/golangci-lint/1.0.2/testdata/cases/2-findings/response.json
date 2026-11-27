@@ -1,0 +1,1 @@
+{"ok":{"findings":[{"column":11,"key":"errcheck","line":6,"message":"Error return value of `os.Remove` is not checked","path":"planted.go","severity":"error"}],"ran":true}}

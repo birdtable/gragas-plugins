@@ -1,0 +1,1 @@
+{"body":{"pairs":[{"aspect":"value","found":"error","key":"no-var","preset":"error"},{"aspect":"options","found":["always"],"key":"eqeqeq","preset":["always",{"null":"ignore"}]}],"tool_version":"10.13.0"},"contract":1,"features":[],"op":"rank"}

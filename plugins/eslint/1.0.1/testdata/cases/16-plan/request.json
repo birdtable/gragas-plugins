@@ -1,0 +1,1 @@
+{"body":{"config":[{"data":{"text":"import shared from \"../shared.mjs\";\nexport default [shared];\n"},"path":"eslint.config.mjs"}],"for":"config","have":[],"round":0,"target":"source","tool_version":"10.13.0"},"contract":1,"features":[],"op":"plan"}

@@ -1,0 +1,1 @@
+{"error":{"code":"refused","message":"the config file \"eslint.config.mjs\" reaches beyond its one file: it imports \"../shared.mjs\", and the plan places only the config","path":"/config/0/data/text"}}

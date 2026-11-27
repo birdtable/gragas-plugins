@@ -1,0 +1,20 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "plan",
+  "body": {
+    "tool_version": "0.51.0",
+    "config": [
+      {
+        "path": "sgconfig.yml",
+        "data": {
+          "text": "ruleDirs:\n  - ../outside\n"
+        }
+      }
+    ],
+    "have": [],
+    "for": "config",
+    "target": "source",
+    "round": 0
+  }
+}

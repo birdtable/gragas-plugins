@@ -1,0 +1,6 @@
+id: no-eval
+language: javascript
+severity: error
+message: do not call eval
+rule:
+  pattern: eval($A)

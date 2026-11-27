@@ -1,0 +1,1 @@
+{"ok":{"entries":[{"key":"module","on":true,"value":"esnext"},{"key":"moduleResolution","on":true,"value":"bundler"},{"key":"noEmit","on":true,"value":true},{"key":"strict","on":true,"value":true},{"key":"target","on":true,"value":"es2022"},{"key":"types","on":true,"value":[]}]}}

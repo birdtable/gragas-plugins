@@ -1,0 +1,11 @@
+{
+  "ok": {
+    "steps": [
+      {
+        "kind": "read",
+        "glob": "sgconfig.yml"
+      }
+    ],
+    "final": false
+  }
+}

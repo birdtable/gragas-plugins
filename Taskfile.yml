@@ -1,0 +1,246 @@
+# The gate's tiers, run by go-task (pinned in gate/pins.env). No CI runs on a push or a
+# pull request: the pre-commit and pre-push hooks run these on the machine that pushes,
+# and the lander runs `task landing`. Every member names itself when it is red.
+# What waits on other tickets is in README.md (The gate); nothing here is a placeholder.
+version: "3"
+
+dotenv: ['gate/pins.env']
+
+vars:
+  # The pinned Go, for every member, a hand run too. A variable of the Taskfile, because the
+  # caller's environment wins over the dotenv and over env: a GOTOOLCHAIN the caller has set
+  # would build the member with its Go. A pins file the reader refuses stops the run first.
+  GO_PIN:
+    sh: sh gate/read-pins.sh GOTOOLCHAIN
+  # The tools' pins are read the same way, never as the shell's ${GITLEAKS_PIN}: a caller's
+  # GITLEAKS_PIN would win over the dotenv and run another gitleaks, or its value split into a
+  # flag (--exit-code=0) that greens a leak. A file var is set over the caller's
+  # environment, and the reader holds each value to a version or a full commit.
+  GITLEAKS_PIN:
+    sh: sh gate/read-pins.sh GITLEAKS_PIN
+  GRAGAS_PIN:
+    sh: sh gate/read-pins.sh GRAGAS_PIN
+  TASK_PIN:
+    sh: sh gate/read-pins.sh TASK_PIN
+  # Every member's Go command is made here: GO for go itself, GO_RUN for a pinned tool.
+  GO: env GOTOOLCHAIN={{.GO_PIN}} go
+  GO_RUN: env GOTOOLCHAIN={{.GO_PIN}} GOFLAGS=-mod=mod GOWORK=off GOPRIVATE=github.com/birdtable go run
+  # The folder the secret members read; secrets-plants gives its own.
+  SECRETS_DIR: "."
+
+tasks:
+  default:
+    cmds:
+      - task: pre-push
+
+  pre-commit:
+    desc: The check-only members, as the pre-commit hook runs them
+    deps: [pins, no-python, secrets-staged]
+
+  pre-push:
+    desc: What a push must pass
+    deps: [pins, no-python, gragas-state, no-ci, no-replace, go-work-exact, go-tests, go-tests-alone, secrets, secrets-staged, secrets-plants, plugins, plugins-plants, release-plants, ledger, go-env, env-plants]
+
+  landing:
+    desc: The lander's check on the merged tree (the push tier today; the members that wait are in README.md)
+    cmds:
+      # The lander runs `task landing` from its own shell, so this member re-runs the tier in an
+      # allowlisted environment (gate/clean-env.sh): a task or Go switch the caller set
+      # does not reach a member. The outer task reads the caller's environment for this one command only.
+      - cmd: sh gate/clean-env.sh env GOTOOLCHAIN={{.GO_PIN}} GOFLAGS=-mod=mod GOWORK=off go run github.com/go-task/task/v3/cmd/task@{{.TASK_PIN}} pre-push
+        silent: true
+
+  go-env:
+    desc: "What the pinned go would build with is go's default, in the environment and in the caller's go env file (go env -w): a GOFLAGS, GOEXPERIMENT, GOWASM or GOFIPS140 is refused by name, and so is a GOVERSION off the pin"
+    cmds:
+      - cmd: env GO_PIN={{.GO_PIN}} sh gate/go-env.sh
+        silent: true
+
+  env-plants:
+    desc: Each task, Go and git switch planted in the caller's environment reaches a child without gate/clean-env.sh and none reaches it through the cleaner, which keeps the allowlisted names with their values
+    cmds:
+      - cmd: sh gate/env-plants.sh
+        silent: true
+
+  hooks:
+    desc: Arm this clone, the one sanctioned way - core.hooksPath is set to this repository's own hooks folder and to nothing else
+    cmds:
+      - cmd: |
+          [ -z "${GIT_DIR:-}${GIT_WORK_TREE:-}${GIT_COMMON_DIR:-}${GIT_CONFIG:-}${GIT_CONFIG_PARAMETERS:-}${GIT_CONFIG_COUNT:-}" ] || { echo "hooks: a GIT_ variable is set: it could point git at another repository, so nothing is armed: unset it" >&2; exit 1; }
+          top="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+          [ -n "$top" ] && [ "$top" -ef . ] || { echo "hooks: git's top level here ('${top:-none}') is not the folder of this Taskfile: nothing is armed" >&2; exit 1; }
+          for h in pre-commit pre-push; do
+            [ -f "hooks/$h" ] && [ ! -L "hooks/$h" ] || { echo "hooks: hooks/$h is not a regular file of this repository: nothing is armed" >&2; exit 1; }
+          done
+          now="$(git config --local --get core.hooksPath || true)"
+          case "$now" in
+            ""|hooks) ;;
+            *) echo "hooks: core.hooksPath is already '$now', not hooks: this task never replaces another path; a person looks at it first" >&2; exit 1 ;;
+          esac
+          git config --local core.hooksPath hooks
+          echo "hooks: armed: pre-commit and pre-push of hooks/ run in this clone and its worktrees (task armed proves it)"
+        silent: true
+
+  armed:
+    desc: Is this clone armed - core.hooksPath is exactly hooks, and both hooks are committed as programs
+    cmds:
+      - cmd: |
+          now="$(git config --local --get core.hooksPath || true)"
+          [ "$now" = hooks ] || { echo "armed: core.hooksPath is '${now:-unset}', not hooks, so no hook runs in this clone. Run: task hooks" >&2; exit 1; }
+          for h in pre-commit pre-push; do
+            case "$(git ls-files -s "hooks/$h")" in
+              "100755 "*) ;;
+              *) echo "armed: hooks/$h is not committed as a program (mode 100755), so git would skip it" >&2; exit 1 ;;
+            esac
+          done
+          echo "armed: pre-commit and pre-push run in this clone"
+        silent: true
+
+  pins:
+    desc: gate/pins.env is comments, blanks and the four pins (Go, the runner, gitleaks, gragas), each once in its form, and no other line
+    cmds:
+      - cmd: sh gate/read-pins.sh
+        silent: true
+
+  no-python:
+    desc: No Python in this repository's tooling
+    cmds:
+      - cmd: |
+          found="$(git ls-files -- '*.py' '*.pyi' 'requirements*.txt' 'Pipfile' 'pyproject.toml' 'setup.py' 'tox.ini')"
+          [ -z "$found" ] || { echo "no-python: tracked Python files: $found" >&2; exit 1; }
+        silent: true
+
+  gragas-state:
+    desc: Every call of a built gragas in gate/ (a line with /gragas" and a subcommand) sets XDG_STATE_HOME on the same line, so the machine-wide lock of the account's state folder is never taken by a member (gragas#2361)
+    cmds:
+      - cmd: |
+          bad="$(grep -nE '/gragas" +[a-z]' gate/*.sh | grep -vE '^[^:]+:[0-9]+:[[:space:]]*#' | grep -v 'XDG_STATE_HOME=' || true)"
+          [ -z "$bad" ] || { printf 'gragas-state: a gragas call without its own XDG_STATE_HOME:\n%s\n' "$bad" >&2; exit 1; }
+        silent: true
+
+  no-ci:
+    desc: No CI on a push or a pull request
+    cmds:
+      - cmd: |
+          found="$(git ls-files -- '.github/workflows' '.circleci' '.gitlab-ci.yml' 'Jenkinsfile' '.travis.yml' 'azure-pipelines.yml')"
+          [ -z "$found" ] || { echo "no-ci: this repository has no CI: $found" >&2; exit 1; }
+        silent: true
+
+  no-replace:
+    desc: No replace directive in any go.mod or in any go.work, at any depth
+    cmds:
+      - cmd: |
+          found="$(git ls-files -- 'go.mod' '**/go.mod' 'go.work' '**/go.work' | while read -r f; do grep -Hn -E '^[[:space:]]*replace([[:space:]]|\()' "$f" || true; done)"
+          [ -z "$found" ] || { echo "no-replace: a replace is refused, file and line: $found" >&2; exit 1; }
+        silent: true
+
+  go-work-exact:
+    desc: If go.work exists, its use lines are every folder that holds a go.mod, and nothing else; go.work.sum is committed
+    cmds:
+      - cmd: |
+          nested="$(git ls-files -- '**/go.work')"
+          [ -z "$nested" ] || { echo "go-work-exact: a go.work below the root is taken by go for its folder and seen by no member: $nested" >&2; exit 1; }
+          mods="$(git ls-files -- 'go.mod' '**/go.mod' | while read -r f; do d="$(dirname "$f")"; echo "./$d" | sed 's|^\./\.$|.|'; done | sort)"
+          if [ ! -f go.work ]; then
+            [ -z "$mods" ] || { echo "go-work-exact: modules exist but go.work is missing: $mods" >&2; exit 1; }
+            exit 0
+          fi
+          git ls-files --error-unmatch go.work go.work.sum >/dev/null 2>&1 || { echo "go-work-exact: go.work and go.work.sum must both be committed" >&2; exit 1; }
+          uses="$(awk '/^use[[:space:]]*\(/{b=1;next} b&&/^\)/{b=0} b{print $1;next} /^use[[:space:]]+[^(]/{print $2}' go.work | sed 's|/$||' | sort)"
+          [ "$uses" = "$mods" ] || { echo "go-work-exact: go.work's use lines are not exactly the folders with a go.mod" >&2; echo "use: $uses" >&2; echo "go.mod folders: $mods" >&2; exit 1; }
+        silent: true
+
+  # The two Go members (go-tests, go-tests-alone) run by GO, the pinned Go, as every member does, so a
+  # hand run with another go on the path or another GOTOOLCHAIN set builds with the pin too. The hooks' GOFLAGS=-mod=mod
+  # and GOWORK=off are unset for them: a workspace refuses -mod=mod, and a user's go never writes a missing requirement
+  # into go.mod. The plugins require the SDK, a private module, so each run names GOPRIVATE=github.com/birdtable for the
+  # fetch alone, as the plugin build does.
+  go-tests:
+    desc: "Every module's vet, its vet as the 32-bit target linux/386, named in full so it means the same on every host (an int constant past 32 bits does not compile there), and its tests, in the workspace"
+    cmds:
+      - cmd: |
+          for f in $(git ls-files -- 'go.mod' '**/go.mod'); do
+            d="$(dirname "$f")"
+            (cd "$d" && env -u GOWORK -u GOFLAGS GOPRIVATE=github.com/birdtable {{.GO}} vet ./... && env -u GOWORK -u GOFLAGS GOPRIVATE=github.com/birdtable GOOS=linux GOARCH=386 {{.GO}} vet ./... && env -u GOWORK -u GOFLAGS GOPRIVATE=github.com/birdtable {{.GO}} test -count=1 ./...) || { echo "go-tests: $d is red in the workspace (vet, vet as the 32-bit target linux/386, or test)" >&2; exit 1; }
+          done
+        silent: true
+
+  go-tests-alone:
+    desc: Every module's tests with the workspace off, as a user gets it
+    cmds:
+      - cmd: |
+          for f in $(git ls-files -- 'go.mod' '**/go.mod'); do
+            d="$(dirname "$f")"
+            (cd "$d" && env -u GOFLAGS GOWORK=off GOPRIVATE=github.com/birdtable {{.GO}} test -count=1 ./...) || { echo "go-tests-alone: $d is red with the workspace off" >&2; exit 1; }
+          done
+        silent: true
+
+  # secrets-staged is in the pre-commit tier and in the push tier too: the lander's tree is a squash
+  # staged on a detached HEAD at the base, where origin/main..HEAD holds no commit, so secrets reads nothing there
+  # and the stage is what the landing lands. A push leaves the stage empty, and it scans nothing.
+  # SECRETS_DIR is the folder the scan reads, "." here; secrets-plants names a throwaway repository.
+  #
+  # Both members run gate/secrets.sh, the one place the command line is written: it names the config,
+  # gate/gitleaks.toml, by absolute path ({{.ROOT_DIR}}), so a tree never supplies one, and it is red on a tracked
+  # .gitleaks.toml or .gitleaksignore (gate/secrets-refuse.sh). There is no .gitleaksignore here.
+  secrets-staged:
+    desc: gitleaks over the staged change, under gate/gitleaks.toml
+    cmds:
+      - cmd: env GITLEAKS='{{.GO_RUN}} github.com/zricethezav/gitleaks/v8@{{.GITLEAKS_PIN}}' sh gate/secrets.sh staged '{{.SECRETS_DIR}}' '{{.ROOT_DIR}}/gate/gitleaks.toml' '{{.ROOT_DIR}}/gate/gitleaks-private-key.toml'
+        timeout: 5m
+
+  secrets:
+    desc: gitleaks over the commits past origin/main, under gate/gitleaks.toml
+    cmds:
+      - cmd: env GITLEAKS='{{.GO_RUN}} github.com/zricethezav/gitleaks/v8@{{.GITLEAKS_PIN}}' sh gate/secrets.sh range '{{.SECRETS_DIR}}' '{{.ROOT_DIR}}/gate/gitleaks.toml' '{{.ROOT_DIR}}/gate/gitleaks-private-key.toml'
+        timeout: 5m
+
+  secrets-plants:
+    desc: A squash staged on a detached HEAD at the base, as the lander stages it, is red in secrets-staged when it holds a planted key and green when it does not; the range secrets reads none of it (gate/secrets-plants.sh)
+    cmds:
+      - cmd: env TASK_CMD='{{.GO_RUN}} github.com/go-task/task/v3/cmd/task@{{.TASK_PIN}}' sh gate/secrets-plants.sh
+        timeout: 10m
+
+  # By hand, as gragas's scan-names is: no tier runs it, because the hashed list is private and
+  # a machine without GRAGAS_NAMES_HASHES must not fail a push for it. Run it before you ask for review.
+  names:
+    desc: The hashed-names scan (GRAGAS_NAMES_HASHES) over every tracked file and path, the branch and each commit past origin/main, by the pinned gragas
+    cmds:
+      - cmd: '{{.GO_RUN}} github.com/birdtable/gragas/cmd/gragas-dev@{{.GRAGAS_PIN}} scan names -C .'
+        timeout: 10m
+
+  plugins:
+    desc: For each plugin folder (plugins/<name>/<version>/), build its .wasm with the pinned Go and run gragas plugin test on it from the pinned gragas, or, for a bundle RELEASES records, run it on the plugin.wasm the folder carries; with no plugin folder yet it passes and says so
+    cmds:
+      - cmd: env GO_PIN={{.GO_PIN}} GRAGAS_PIN={{.GRAGAS_PIN}} sh gate/plugins.sh .
+        timeout: 20m
+
+  plugins-plants:
+    desc: Each plant under gate/testdata/plugins (a bundle that fails a check that runs, a .wasm that does not build, a released bundle that carries no .wasm, a bundle RELEASES does not name whose source has changed) is red in the plugins member, with its own line, and each control (the clean control, a released bundle tested with the .wasm it carries) passes
+    cmds:
+      - cmd: env GO_PIN={{.GO_PIN}} GRAGAS_PIN={{.GRAGAS_PIN}} sh gate/plugins-plants.sh
+        timeout: 20m
+
+  release-plan:
+    desc: "The step before a release tag, on the landed commit: task release-plan -- <name>/v<version> builds the bundle twice from the commit's tree with the commit's pins and prints the line the annotated tag's message carries (gate/release.sh)"
+    cmds:
+      - cmd: sh gate/release.sh plan {{.CLI_ARGS}}
+        timeout: 20m
+
+  release:
+    desc: "From a release tag: task release -- <name>/v<version> [<out folder>] rebuilds the bundle twice from the tag's commit and holds it to the digest the tag records; with an out folder it copies the bundle there. It publishes and pushes nothing"
+    cmds:
+      - cmd: sh gate/release.sh tagged {{.CLI_ARGS}}
+        timeout: 20m
+
+  ledger:
+    desc: "RELEASES, the release ledger: origin holds each recorded tag at the recorded object, the released folder is as its commit has it, and the ledger only grows (gate/ledger.sh)"
+    cmds:
+      - cmd: sh gate/ledger.sh
+        timeout: 5m
+
+  release-plants:
+    desc: The release of a bundle, proved in a throwaway repository with an origin of its own (the clean control planned, tagged and rebuilt), and each plant red with its own line (gate/release-plants.sh)
+    cmds:
+      - cmd: sh gate/release-plants.sh
+        timeout: 20m

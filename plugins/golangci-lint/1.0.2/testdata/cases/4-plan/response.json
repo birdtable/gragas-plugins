@@ -1,0 +1,25 @@
+{
+  "ok": {
+    "steps": [
+      {
+        "kind": "run",
+        "program": "golangci-lint",
+        "argv": [
+          "linters",
+          "--json",
+          "-c",
+          "{scratch}/.golangci.json"
+        ],
+        "place": [
+          {
+            "path": ".golangci.json",
+            "data": {
+              "text": "{\"version\": \"2\"}\n"
+            }
+          }
+        ]
+      }
+    ],
+    "final": true
+  }
+}

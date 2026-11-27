@@ -1,0 +1,87 @@
+#!/bin/sh
+# git runs this at the top of the tree with the pushed refs on stdin. For each pushed commit
+# it runs the pinned task pre-push on an export of that commit, not on the working tree: the
+# commit's tree written from its blobs into a folder of its own, with an index of its own, by
+# gate/export.sh, which proves it byte for byte against git ls-tree -r. So an
+# untracked file, a tracked change not committed and a file marked skip-worktree or
+# assume-unchanged never reach the members, and a push of a ref that is not HEAD is judged by
+# its own tree. The pins are read from the export, so the run is the pushed commit's.
+# A tag's own sha is peeled to its commit. Armed once per clone by `task hooks`.
+# Never push with --no-verify.
+#
+# This file is the one file of the working tree that the push reads, since git runs the hook from
+# there and no hook can avoid that. Everything else it runs is the pushed commit's: gate/export.sh
+# is written from that commit's blob, and the members and the pins are read from the export.
+#
+# A push never reads replace refs, so neither does this: with them read, git ls-tree, git cat-file
+# and the proof would see another commit's tree than the one pushed. Every git below inherits it.
+# A grafts file and a shallow clone change a commit's parents, which the secrets member's range
+# reads, and neither has a switch: so they are refused.
+set -eu
+GIT_NO_REPLACE_OBJECTS=1
+export GIT_NO_REPLACE_OBJECTS
+[ -z "${GIT_GRAFT_FILE:-}" ] || {
+  echo "pre-push: GIT_GRAFT_FILE is set, which changes a commit's parents: unset it, nothing is pushed" >&2
+  exit 1
+}
+grafts="$(git rev-parse --git-path info/grafts)"
+[ ! -e "$grafts" ] && [ ! -L "$grafts" ] || {
+  echo "pre-push: $grafts exists, which changes a commit's parents: remove it, nothing is pushed" >&2
+  exit 1
+}
+[ "$(git rev-parse --is-shallow-repository)" = false ] || {
+  echo "pre-push: the clone is shallow, which hides a commit's parents: fetch with --unshallow, nothing is pushed" >&2
+  exit 1
+}
+zero=0000000000000000000000000000000000000000
+tips=""
+while read -r _ local_sha _ _; do
+  [ "$local_sha" = "$zero" ] && continue
+  tip="$(git rev-parse --verify --quiet "${local_sha}^{commit}")" || {
+    echo "pre-push: $local_sha is not a commit, so there is no tree to check: nothing is pushed" >&2
+    exit 1
+  }
+  case " $tips " in *" $tip "*) ;; *) tips="$tips $tip" ;; esac
+done
+[ -n "$tips" ] || exit 0
+
+base="$(mktemp -d "${TMPDIR:-/tmp}/gragas-plugins-push.XXXXXX")"
+tree="$base/tree"
+export_sh="$base/export.sh"
+cleanup() {
+  git worktree remove --force "$tree" >/dev/null 2>&1 || true
+  rm -f "$export_sh"
+  rmdir "$base" >/dev/null 2>&1 || true
+  git worktree prune >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+trap 'exit 1' HUP INT TERM
+
+for tip in $tips; do
+  # The pushed commit's own gate/export.sh, from its blob: the working tree's copy may hold a
+  # change that is not committed.
+  git cat-file blob "$tip:gate/export.sh" > "$export_sh" || {
+    echo "pre-push: $tip holds no gate/export.sh to make its export with: nothing is pushed" >&2
+    exit 1
+  }
+  sh "$export_sh" "$tip" "$tree" || exit 1
+  # A hook inherits git's variables; in the export they would point git back at this working
+  # tree and its index, so they are cleared for the run. set -e does not hold in a subshell
+  # on the left of ||, so each step that can fail exits by itself.
+  (
+    cd "$tree" || exit 1
+    unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_COMMON_DIR GIT_PREFIX \
+      GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CONFIG GIT_CONFIG_PARAMETERS GIT_CONFIG_COUNT
+    task_pin="$(sh gate/read-pins.sh TASK_PIN)" || exit 1
+    go_pin="$(sh gate/read-pins.sh GOTOOLCHAIN)" || exit 1
+    echo "pre-push: checking $tip on an export of it" >&2
+    # The run gets an allowlisted environment (gate/clean-env.sh): no task, Go or git
+    # switch of the pusher's reaches it, so the unset above is a second line, not the only one.
+    sh gate/clean-env.sh env GOTOOLCHAIN="$go_pin" GOFLAGS=-mod=mod GOWORK=off \
+      go run "github.com/go-task/task/v3/cmd/task@${task_pin}" pre-push </dev/null
+  ) || {
+    echo "pre-push: $tip is red on an export of it: nothing is pushed" >&2
+    exit 1
+  }
+  git worktree remove --force "$tree"
+done

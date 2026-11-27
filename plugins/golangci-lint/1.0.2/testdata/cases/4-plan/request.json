@@ -1,0 +1,13 @@
+{
+  "contract": 1,
+  "features": [],
+  "op": "plan",
+  "body": {
+    "tool_version": "2.15.0",
+    "config": [],
+    "have": [],
+    "for": "config",
+    "target": "source",
+    "round": 0
+  }
+}

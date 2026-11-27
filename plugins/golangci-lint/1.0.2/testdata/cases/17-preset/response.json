@@ -1,0 +1,10 @@
+{
+  "ok": {
+    "files": [
+      {
+        "path": ".golangci.yml",
+        "text": "# gragas:generated\nversion: \"2\"\n\nlinters:\n  default: standard\n  enable:\n    # generated:linters:begin\n    - errcheck # go.err.1\n    - gocritic # arch.ports.11, arch.ports.24, arch.shared.7, cli.look.1, go.style.5, tests.doubles.2\n    # generated:linters:end\n"
+      }
+    ]
+  }
+}

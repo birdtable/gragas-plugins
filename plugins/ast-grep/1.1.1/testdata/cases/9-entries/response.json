@@ -1,0 +1,38 @@
+{
+  "ok": {
+    "entries": [
+      {
+        "key": "no-eval",
+        "on": true,
+        "severity": "error",
+        "value": {
+          "pattern": "eval($A)"
+        },
+        "options": {
+          "language": "js"
+        }
+      },
+      {
+        "key": "no-var",
+        "on": true,
+        "severity": "info",
+        "value": {
+          "pattern": "var $A"
+        },
+        "options": {
+          "language": "js"
+        }
+      },
+      {
+        "key": "quiet",
+        "on": false,
+        "value": {
+          "pattern": "x"
+        },
+        "options": {
+          "language": "js"
+        }
+      }
+    ]
+  }
+}
