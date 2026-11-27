@@ -30,4 +30,4 @@ programs:
     versions: ">=2.15.0 <3.0.0"
     version_argv: [--version]
     path: .tools/bin/golangci-lint
-wasm: sha256:64ed38fd13baa19a779645c4e52ebc94c93328a7ebb76d28424ac576a717cf74
+wasm: sha256:53777b2d487ec4453880597f31c51126457b324d022b9d38b54c73eff857d7b1

@@ -25,4 +25,4 @@ programs:
     manifest: node_modules/typescript/package.json
     script_at: /bin/tsc
     interpreter: node
-wasm: sha256:2284c91314c4bab2aaee345c627885bb2c60917299147392182c4fe7720afefc
+wasm: sha256:5d75097d561cd77e88d516e27abde9198b96ac778732dd0a8f61130184fdf5a1
