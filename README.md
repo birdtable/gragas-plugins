@@ -1,8 +1,10 @@
 <p align="center">
-    <img width="72" alt="" src="docs/gragas-plugins.svg" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/mark/gragas-plugins-banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/mark/gragas-plugins-banner-light.svg">
+    <img src="docs/mark/gragas-plugins-banner-light.svg" width="422" alt="gragas-plugins: the gragas feather with a plug, then a coral bird in flight and the name">
+  </picture>
 </p>
-
-# gragas-plugins
 
 The plugins that connect [gragas](https://github.com/birdtable/gragas) to each tool: `ast-grep`, `eslint`, `golangci-lint` and `tsc`.
 
